@@ -1,8 +1,7 @@
-# date-time-toolkit
+# datetime-kit
 
-[![npm version](https://img.shields.io/npm/v/date-time-toolkit.svg)](https://www.npmjs.com/package/date-time-toolkit)
-[![npm downloads](https://img.shields.io/npm/dm/date-time-toolkit.svg)](https://www.npmjs.com/package/date-time-toolkit)
-[![license](https://img.shields.io/npm/l/date-time-toolkit.svg)](https://github.com/rahuldadhich15/date-time-toolkit/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/%40rahul_dadhich15%2Fdatetime-kit.svg)](https://www.npmjs.com/package/@rahul_dadhich15/datetime-kit)
+[![npm downloads](https://img.shields.io/npm/dm/%40rahul_dadhich15%2Fdatetime-kit.svg)](https://www.npmjs.com/package/@rahul_dadhich15/datetime-kit)
 [![TypeScript](https://img.shields.io/badge/TypeScript-first-blue.svg)](https://www.typescriptlang.org/)
 
 A lightweight, dependency-free TypeScript toolkit for working with dates, times, timezones, relative time, and cron scheduling.
