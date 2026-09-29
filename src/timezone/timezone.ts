@@ -1,3 +1,8 @@
+import {
+  convertTimezoneBetween,
+  type TimezoneConvertOptions,
+} from "../timezone-convert/index.js";
+
 export interface TimezoneFormatOptions {
   locale?: string;
   dateStyle?: "full" | "long" | "medium" | "short";
@@ -9,19 +14,40 @@ const DEFAULT_LOCALE = "en-US";
 export function convertTimezone(
   date: Date,
   timeZone: string,
-  options: TimezoneFormatOptions = {}
+  options?: TimezoneFormatOptions
+): string;
+export function convertTimezone(
+  dateOrString: Date | string,
+  fromTimezone: string,
+  toTimezone: string,
+  options?: TimezoneConvertOptions
+): string;
+export function convertTimezone(
+  dateOrString: Date | string,
+  timeZoneOrFrom: string,
+  optionsOrTo?: TimezoneFormatOptions | string,
+  options?: TimezoneConvertOptions
 ): string {
-  validateDate(date);
-  validateTimezone(timeZone);
+  if (typeof optionsOrTo === "string") {
+    return convertTimezoneBetween(
+      dateOrString,
+      timeZoneOrFrom,
+      optionsOrTo,
+      options
+    );
+  }
 
-  const formatter = new Intl.DateTimeFormat(
-    options.locale ?? DEFAULT_LOCALE,
-    {
-      dateStyle: options.dateStyle ?? "medium",
-      timeStyle: options.timeStyle ?? "medium",
-      timeZone,
-    }
-  );
+  const date =
+    dateOrString instanceof Date ? dateOrString : new Date(dateOrString);
+  validateDate(date);
+  validateTimezone(timeZoneOrFrom);
+
+  const opts = optionsOrTo ?? {};
+  const formatter = new Intl.DateTimeFormat(opts.locale ?? DEFAULT_LOCALE, {
+    dateStyle: opts.dateStyle ?? "medium",
+    timeStyle: opts.timeStyle ?? "medium",
+    timeZone: timeZoneOrFrom,
+  });
 
   return formatter.format(date);
 }
