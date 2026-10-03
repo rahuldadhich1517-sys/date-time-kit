@@ -2,10 +2,15 @@
 
 [![npm version](https://img.shields.io/npm/v/%40rahul_dadhich15%2Fdatetime-kit.svg)](https://www.npmjs.com/package/@rahul_dadhich15/datetime-kit)
 [![npm downloads](https://img.shields.io/npm/dm/%40rahul_dadhich15%2Fdatetime-kit.svg)](https://www.npmjs.com/package/@rahul_dadhich15/datetime-kit)
+[![Runtime dependencies](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen)](https://www.npmjs.com/package/@rahul_dadhich15/datetime-kit)
+[![Modules](https://img.shields.io/badge/modules-ESM%20%2B%20CommonJS-blue)](https://www.npmjs.com/package/@rahul_dadhich15/datetime-kit)
+[![Node.js](https://img.shields.io/badge/Node.js-16%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![license](https://img.shields.io/npm/l/%40rahul_dadhich15%2Fdatetime-kit.svg)](https://github.com/rahuldadhich1517-sys/date-time-toolkit/blob/main/LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-first-blue.svg)](https://www.typescriptlang.org/)
 
 A lightweight, dependency-free TypeScript toolkit for dates, times, timestamps, durations, time zones, calendars, schedules, cron expressions, working days, holidays, calendar events, and world clocks.
+
+The package publishes ESM and CommonJS entry points with TypeScript declarations. It targets ES2022 and uses built-in `Date`, `Intl`, and timer APIs. It does not declare a Node.js `engines` range; CI currently runs on Node.js 24. There is no dedicated browser bundle.
 
 ---
 
@@ -36,14 +41,9 @@ A lightweight, dependency-free TypeScript toolkit for dates, times, timestamps, 
   - [18. Unix Timestamp](#18-unix-timestamp)
   - [19. World Clock](#19-world-clock)
 - [TypeScript Types](#typescript-types)
-- [Timezone & DST Behavior](#timezone--dst-behavior)
-- [Holiday Data & Limitations](#holiday-data--limitations)
-- [ICS Generation & Recurrence Details](#ics-generation--recurrence-details)
-- [ISO 8601 Duration Limitations](#iso-8601-duration-limitations)
-- [Security & Runtime Dependency Notes](#security--runtime-dependency-notes)
+- [Pitfalls & Limitations](#pitfalls--limitations)
+- [Runtime Dependency Notes](#runtime-dependency-notes)
 - [ESM & CommonJS Usage](#esm--commonjs-usage)
-- [Development, Testing & Build](#development-testing--build)
-- [Project Structure](#project-structure)
 - [CI](#ci)
 - [Contributing](#contributing)
 - [License](#license)
@@ -52,29 +52,28 @@ A lightweight, dependency-free TypeScript toolkit for dates, times, timestamps, 
 
 ## Overview
 
-`datetime-kit` provides 21 comprehensive, production-grade date/time utilities in a single zero-dependency package. Built natively with modern JavaScript and ECMAScript Internationalization (`Intl`) standards, it runs seamlessly in Node.js, browsers, and edge environments.
+`@rahul_dadhich15/datetime-kit` groups its date/time utilities into 19 API areas. It relies on JavaScript built-ins, including `Date`, `Intl`, and timers, rather than runtime dependencies.
 
 ---
 
 ## Features
 
 - **Zero runtime dependencies**: Pure TypeScript / modern JavaScript.
-- **Dual module output**: Full native ESM and CommonJS support with TypeScript declaration files.
-- **Deterministic and lightweight**: Fast startup and minimal package footprint (~46 kB packed).
+- **Dual module output**: ESM and CommonJS entry points with TypeScript declaration files.
 - **Comprehensive coverage**:
-  - Unix & ISO timestamps with strict unit safety (seconds vs milliseconds)
+  - Unix and ISO timestamps with seconds/milliseconds conversion helpers
   - Locale-aware date formatting and human relative times
   - IANA timezone conversion, offsets, place-to-zone matching, and DST transitions
   - Standard 5-field cron parsing, human descriptions, and next run calculations
   - Business days counting, weekend customization, and holiday exclusion
-  - High-precision countdown timers with start/pause/resume/stop lifecycle
+  - Countdown timers with start/pause/resume/stop lifecycle
   - Calendar-aware duration differences (distinguishing calendar units from absolute elapsed time)
   - Target countdowns with day boundaries and timezone awareness
   - Dynamic Discord timestamp markdown formatting
   - Time/hour arithmetic (adding, subtracting, parsing, and totaling)
-  - iCalendar (`.ics`) RFC 5545 event and recurrence generation
+  - iCalendar (`.ics`) event and subset recurrence generation
   - ISO 8601 duration parser and builder (`PnYnMnDTnHnMnS`)
-  - Curated national public holidays lookup for 5 major countries
+  - Curated public holiday lookup for 5 countries
   - Daily schedule grid builder with slot durations and breaks
   - Multi-city world clocks
 
@@ -150,6 +149,8 @@ Convert between `Date` instances, Unix timestamps (seconds / milliseconds), and 
 - `toISOString(date: Date): string`
 - `fromISOString(value: string): Date`
 
+The timestamp unit defaults to `"milliseconds"`.
+
 ```ts
 import { toUnixTimestamp, fromUnixTimestamp } from "@rahul_dadhich15/datetime-kit";
 
@@ -165,7 +166,7 @@ fromUnixTimestamp(1789128000, "seconds"); // Date object
 
 ### 2. Date Formatting
 
-Format dates using native `Intl.DateTimeFormat`.
+Format dates using native `Intl.DateTimeFormat`. The default locale is `"en-US"` and the default format is `"medium"`; `"iso"` returns `Date.prototype.toISOString()` output.
 
 - `formatDate(date: Date, options?: DateFormatterOptions): string`
 
@@ -185,6 +186,8 @@ Available formats: `"short" | "medium" | "long" | "full" | "iso"`.
 Format relative time differences using native `Intl.RelativeTimeFormat`.
 
 - `formatRelativeTime(date: Date, baseDate?: Date, options?: RelativeTimeOptions): string`
+
+The default base date is now; locale, numeric style, and output style default to `"en-US"`, `"auto"`, and `"long"`. Differences under 10 seconds use the fixed English strings `"just now"` or `"in a few seconds"`.
 
 ```ts
 import { formatRelativeTime } from "@rahul_dadhich15/datetime-kit";
@@ -206,6 +209,8 @@ Extract offsets, timezone names, or format dates in target timezones.
 - `getTimezoneOffset(date: Date, timeZone: string): number` (returns offset in minutes)
 - `getTimezoneName(date: Date, timeZone: string, locale?: string): string`
 
+The formatted timezone overload defaults to locale `"en-US"` with medium date and time styles. `convertTimezoneBetween` returns `YYYY-MM-DDTHH:mm:ss` by default; pass formatting options for localized output.
+
 ```ts
 import { convertTimezone, getTimezoneOffset, getTimezoneName } from "@rahul_dadhich15/datetime-kit";
 
@@ -219,13 +224,15 @@ getTimezoneName(date, "Asia/Kolkata"); // "India Standard Time"
 
 ### 5. Cron Expressions
 
-Parse, validate, explain, and compute upcoming execution dates for standard 5-field cron schedules.
+Parse, validate, explain, and compute upcoming execution dates for 5-field cron schedules. Fields accept numeric values, lists, ascending ranges, `*`, and steps over `*` or a range. Day-of-week values are `0` through `6` (Sunday through Saturday); named months/days and other cron extensions are not supported. Upcoming runs use the process's local timezone.
 
 - `parseCron(expression: string): ParsedCron`
 - `isValidCron(expression: string): boolean`
 - `humanizeCron(expression: string): string`
 - `nextCronRun(expression: string, fromDate?: Date, options?: CronNextOptions): Date`
 - `nextCronRuns(expression: string, fromDate?: Date, options?: CronNextOptions & { count?: number }): Date[]`
+
+`fromDate` defaults to now. `nextCronRuns` returns 5 results by default and searches at most 525,600 minutes; `nextCronRun` requests one result. Set `count` or `maxIterations` to change these limits.
 
 ```ts
 import { parseCron, humanizeCron, nextCronRun } from "@rahul_dadhich15/datetime-kit";
@@ -256,6 +263,8 @@ interface BusinessDaysOptions {
 }
 ```
 
+Date inputs are compared by UTC calendar date. `addBusinessDays` preserves the UTC time of day when its `startDate` is a `Date`; date-only outputs from `getBusinessDays` are at midnight UTC.
+
 #### Example
 
 ```ts
@@ -278,7 +287,7 @@ addBusinessDays("2026-06-05", 1); // 2026-06-08 (skips weekend)
 
 ### 7. Countdown Timer
 
-Calculate countdown values and run live in-memory timers with complete lifecycle controls. Safe for Node.js and browsers (no browser-only APIs).
+Calculate countdown values and run live in-memory timers with lifecycle controls using standard timer APIs.
 
 - `getCountdown(target: Date | string | number, baseDate?: Date | string | number): CountdownValue`
 - `createCountdown(target: Date | string | number, options?: CountdownOptions): CountdownTimer`
@@ -305,6 +314,10 @@ timer.start();
 // timer.stop();
 ```
 
+Pausing stops scheduled ticks but does not freeze the target time; the countdown continues to elapse and is recalculated when resumed. The default tick interval is 1,000 ms.
+
+`CountdownOptions.baseDate` is present in the exported type but is not used by the live timer; use `getCountdown(target, baseDate)` when a reference date is needed.
+
 ---
 
 ### 8. Date Duration
@@ -313,7 +326,7 @@ Calculate the span between two dates with structured calendar components and abs
 
 - `calculateDateDuration(startDate: Date | string | number, endDate: Date | string | number): DateDuration`
 
-#### Difference between calendar duration and absolute elapsed time:
+#### Calendar duration and elapsed time
 
 A calendar month duration reflects actual calendar changes. For instance, `2026-01-31` to `2026-02-28` is **1 calendar month**, while absolute elapsed time is **28 days (2,419,200,000 ms)**.
 
@@ -343,7 +356,7 @@ console.log(duration);
 
 ### 9. Days Until
 
-Count remaining calendar days until a target date.
+Count remaining calendar days until a target date. Without `timeZone`, calendar-day boundaries are derived from UTC; supply an IANA timezone to use that zone's calendar date.
 
 - `daysUntil(target: Date | string | number, options?: DaysUntilOptions): number`
 
@@ -355,7 +368,7 @@ daysUntil("2026-06-16", { from: "2026-06-15" }); // 1
 daysUntil("2026-06-15", { from: "2026-06-15", inclusive: true }); // 1
 ```
 
-*Note: Time of day is ignored; comparison operates on calendar dates.*
+Time of day is ignored. By default, `from` is the current date, `inclusive` is `false`, and date boundaries are interpreted in UTC unless `timeZone` is supplied.
 
 ---
 
@@ -382,11 +395,13 @@ createDiscordTimestamp(new Date()); // "<t:1789128000>"
 createDiscordTimestamp(new Date(), "R"); // "<t:1789128000:R>"
 ```
 
+For numeric inputs, values greater than `100000000000` are interpreted as milliseconds; smaller values are interpreted as Unix seconds.
+
 ---
 
 ### 11. Hours Calculation
 
-Add, subtract, parse, total, and format hours and minutes. Avoids floating point inaccuracies by maintaining integer minute representations internally.
+Add, subtract, parse, total, and format hours and minutes. String inputs accept hour/minute text, colon-formatted values, and integer minute strings; numeric inputs and `formatHours` use minutes.
 
 - `parseHours(value: string | number): ParsedHours`
 - `addHours(...values: (string | number)[]): string`
@@ -407,7 +422,7 @@ totalHours(["2h 30m", "1h 45m", "0h 45m"]); // 5
 
 ### 12. ICS Generation
 
-Generate RFC 5545 compliant iCalendar (`.ics`) file contents with proper CRLF line endings, special character escaping, and automatic 75-octet line folding.
+Generate iCalendar (`.ics`) content with CRLF line endings, text escaping, and line folding. Event timestamps are serialized in UTC. Recurrence options cover a subset of RRULE fields rather than the full RFC 5545 recurrence model.
 
 - `generateICS(events: ICSEvent | ICSEvent[], options?: ICSCalendarOptions): string`
 - `generateICSEvent(event: ICSEvent): string`
@@ -455,7 +470,7 @@ buildISO8601Duration({ years: 1, months: 2, days: 10, hours: 3 });
 
 ### 14. Holidays Lookup
 
-Offline lookup of official national public holidays by country code and year.
+Offline lookup of curated public holidays by country code and year.
 
 - `getHolidays(country: string, year: number): Holiday[]`
 - `isHoliday(date: Date | string | number, country: string): boolean`
@@ -485,6 +500,8 @@ Generate scheduled appointment grids based on time ranges, slot duration, break 
 
 - `buildSchedule(options: ScheduleOptions): ScheduleSlot[]`
 
+`slotDuration` is required and measured in minutes; `breakDuration` defaults to `0`. `start` and `end` are `HH:mm`-style strings or `Date` values (the UTC hour and minute are used for `Date` values). Only complete slots that fit before `end` are returned. Excluded ranges remove overlapping slots; `maxSlots`, when supplied, caps the number returned.
+
 ```ts
 import { buildSchedule } from "@rahul_dadhich15/datetime-kit";
 
@@ -501,7 +518,7 @@ const slots = buildSchedule({
 
 ### 16. Timezone Conversion
 
-Convert dates and wall-clock times between IANA timezones while handling DST transitions seamlessly.
+Convert dates and wall-clock times between IANA timezones using the runtime's timezone database.
 
 - `convertTimezoneBetween(dateOrString: Date | string, fromTimezone: string, toTimezone: string, options?: TimezoneConvertOptions): string`
 - `convertBetweenTimezones(dateOrString: Date | string, fromTimezone: string, toTimezone: string, options?: TimezoneConvertOptions): string`
@@ -530,11 +547,12 @@ convertTimezoneDetailed("2026-06-01T10:00:00", "Asia/Kolkata", "America/New_York
 
 ### 17. Timezone Finder
 
-Find IANA timezones by offset or common place/city names.
+Find IANA timezones by offset or curated place/city aliases. `COMMON_TIMEZONES` is the package's exported list used for offset matching, so offset results are limited to that list rather than every IANA timezone.
 
 - `findTimezoneByPlace(place: string): string | null`
 - `findTimezonesByOffset(offset: string | number, referenceDate?: Date): string[]`
 - `isValidTimezone(timezone: string): boolean`
+- `COMMON_TIMEZONES: readonly string[]`
 
 ```ts
 import { findTimezoneByPlace, findTimezonesByOffset, isValidTimezone } from "@rahul_dadhich15/datetime-kit";
@@ -564,6 +582,8 @@ Comprehensive Unix timestamp utilities with strict range checking and distinct s
 - `isoToUnix(iso: string, unit?: "seconds" | "milliseconds"): number`
 - `formatUnixTimestamp(timestamp: number, options?: UnixTimestampFormatOptions): string`
 
+Timestamp units default to `"milliseconds"`. Formatted output defaults to locale `"en-US"` with medium date and time styles.
+
 ```ts
 import { toUnixSeconds, fromUnixSeconds, unixToISO } from "@rahul_dadhich15/datetime-kit";
 
@@ -576,10 +596,12 @@ const iso = unixToISO(seconds, "seconds");
 
 ### 19. World Clock
 
-View current dates and times across multiple IANA timezones and major global cities.
+View current dates and times across multiple IANA timezones and supported place aliases.
 
 - `getWorldClock(timezones?: string[], options?: WorldClockOptions): WorldClockEntry[]`
 - `getWorldClockForCity(cityOrZone: string, options?: WorldClockOptions): WorldClockEntry`
+
+If no zones are supplied, `getWorldClock` returns UTC, New York, London, Kolkata, Tokyo, and Sydney. The base date defaults to now.
 
 ```ts
 import { getWorldClock, getWorldClockForCity } from "@rahul_dadhich15/datetime-kit";
@@ -649,45 +671,38 @@ import type {
 
 ---
 
-## Timezone & DST Behavior
+## Pitfalls & Limitations
 
-- Timezone calculations leverage the ECMAScript Internationalization API (`Intl.DateTimeFormat`) and the environment's underlying ICU / IANA timezone database.
-- DST shifts (spring forward and fall back) are automatically handled without manual offset calculations.
-- Offsets represent specific points in time; `findTimezonesByOffset` evaluates matching zones against a specified reference date (default: current date).
+Keep these behaviors in mind when choosing an API and interpreting its results:
 
----
-
-## Holiday Data & Limitations
-
-- Holiday data is bundled locally without runtime network requests.
-- Supported countries: India (`IN`), United States (`US`), United Kingdom (`GB`), Canada (`CA`), and Australia (`AU`).
-- **Limitation**: The dataset includes **national and federal public holidays**. It does not claim to include regional, state, provincial, municipal, or discretionary local bank holidays.
-
----
-
-## ICS Generation & Recurrence Details
-
-- Generates RFC 5545 compliant `.ics` calendar content.
-- Enforces CRLF (`\r\n`) line termination, character escaping (`,`, `;`, `\`, `\n`), and 75-octet line folding (`\r\n `).
-- Recurrence (RRULE) support covers standard parameters: `FREQ`, `INTERVAL`, `COUNT`, `UNTIL`, `BYDAY`, `BYMONTHDAY`, and `BYMONTH`. It does not claim full RFC 5545 recurrence coverage (e.g. `BYSETPOS` or secondary exceptions).
+- **Numeric date inputs usually mean milliseconds.** Most functions accepting a `Date | string | number` pass numbers to JavaScript's `Date` constructor, where the number is milliseconds since the Unix epoch. Timestamp helpers also default to milliseconds, unless you specify `"seconds"`. `createDiscordTimestamp` is an exception: it treats numbers above `100000000000` as milliseconds and smaller numbers as seconds. Prefer explicit `Date` objects or the dedicated seconds/milliseconds helpers.
+- **Date strings can represent different kinds of time.** JavaScript parses ISO date-only strings as UTC, while ISO date-time strings without an offset are interpreted in the runtime's local timezone. Other string formats can vary by runtime. Use ISO strings with `Z` or an explicit offset for instants; use `convertTimezoneBetween` with an IANA source timezone for local wall-clock times.
+- **Many calendar calculations use UTC.** Business-day calculations compare UTC calendar dates; `daysUntil` also uses UTC dates unless `timeZone` is provided. `calculateDateDuration` decomposes elapsed time using UTC calendar units. These may differ from a user's local calendar day.
+- **Cron runs in the machine's local timezone.** `nextCronRun` and `nextCronRuns` do not accept a timezone option. If both day-of-month and day-of-week fields are restricted, a match on either field qualifies. The default search limit is 525,600 minutes (one non-leap year), so a valid but infrequent schedule can still exceed it.
+- **DST wall-clock times can be ambiguous or nonexistent.** Timezone conversion uses the runtime's `Intl`/IANA timezone data. A local time during a daylight-saving transition may map to zero or multiple instants; the conversion API does not let you choose a disambiguation policy. Test such inputs if they matter to your application.
+- **Pausing a countdown does not pause time.** `pause()` stops timer callbacks only; the target continues to approach, and the value is recalculated on resume. `CountdownOptions.baseDate` is declared in the type but is not used by `createCountdown`; use `getCountdown(target, baseDate)` for a fixed reference date.
+- **Relative-time strings are not fully localized.** Values less than 10 seconds from the base date return fixed English phrases regardless of the requested locale.
+- **Hour strings have specific units.** Numeric inputs to the hour-calculation utilities represent minutes. Plain integer strings also represent minutes. In colon-formatted strings, the optional seconds component is currently ignored; use `HH:mm` when seconds must not be discarded.
+- **Schedule generation does not roll over midnight.** The end time must be later than the start time on the same day, and only complete slots fitting in that range are returned.
+- **Holiday data is curated and offline.** The package covers `IN`, `US`, `GB`, `CA`, and `AU`, but does not provide an authoritative, regularly updated calendar or all regional, state, provincial, or local holidays. Some movable holiday dates are explicitly bundled for a limited set of years; verify dates for production-critical scheduling.
+- **Timezone lookup is curated.** `findTimezoneByPlace` recognizes a built-in set of aliases, and `findTimezonesByOffset` searches only the exported `COMMON_TIMEZONES` list. Neither function is a general geocoder or exhaustive IANA timezone search.
+- **ICS generation supports a subset of iCalendar.** Dates are serialized in UTC; all-day values use the UTC calendar date. Recurrence covers `FREQ`, `INTERVAL`, `COUNT`, `UNTIL`, `BYDAY`, `BYMONTHDAY`, and `BYMONTH`, not the full RFC 5545 model. Long-line folding counts JavaScript string characters, not UTF-8 octets.
+- **ISO 8601 duration values are not fixed elapsed time.** Years and months depend on the starting date. Do not convert them to milliseconds without choosing an explicit calendar context.
+- **Invalid inputs can throw.** Depending on the function, invalid dates, timezones, cron expressions, and ranges raise `TypeError` or `RangeError`; catch and handle these at application boundaries.
+- **Some options are currently informational only.** `WorldClockOptions.locale`, `dateStyle`, and `timeStyle` are declared but do not change the returned ISO-like date/time strings.
 
 ---
 
-## ISO 8601 Duration Limitations
+## Runtime Dependency Notes
 
-- Parses and builds standard duration formats: `P[nY][nM][nW][nD][T[nH][nM][nS]]`.
-- Note: Calendar units (`years`, `months`) vary in length depending on the specific starting date and cannot be represented as fixed millisecond constants.
-
----
-
-## Security & Runtime Dependency Notes
-
-- **Zero runtime dependencies**: Minimal attack surface, zero dependency drift, and no supply chain vulnerabilities.
-- Safe for secure enterprise environments and isolated serverless runtimes.
+- The published package has no runtime dependencies. Development dependencies are used for building, type checking, and tests.
+- A zero-dependency runtime does not by itself guarantee security; assess the package against your application's requirements.
 
 ---
 
 ## ESM & CommonJS Usage
+
+All runtime APIs are named exports from the package root; there is no default export. Import types separately with `import type`.
 
 ### ECMAScript Modules (ESM)
 
@@ -700,106 +715,6 @@ import { countBusinessDays } from "@rahul_dadhich15/datetime-kit";
 ```cjs
 const { countBusinessDays } = require("@rahul_dadhich15/datetime-kit");
 ```
-
----
-
-## Development, Testing & Build
-
-```bash
-# Clone the repository
-git clone https://github.com/rahuldadhich1517-sys/date-time-toolkit.git
-cd date-time-toolkit
-
-# Install dev dependencies
-npm install
-
-# Run type checking
-npm run typecheck
-
-# Run test suite
-npm run test:run
-
-# Build dual ESM and CJS bundles
-npm run build
-
-# Verify package contents
-npm pack --dry-run
-```
-
----
-
-## Project Structure
-
-```text
-date-time-toolkit/
-├── src/
-│   ├── business-days/
-│   ├── countdown-timer/
-│   ├── cron-humanize/
-│   ├── cron-next/
-│   ├── cron-parser/
-│   ├── date-duration/
-│   ├── date-formatter/
-│   ├── days-until/
-│   ├── discord-timestamp/
-│   ├── holidays-lookup/
-│   │   └── data/
-│   ├── hours-calculate/
-│   ├── ics-generate/
-│   ├── internal/
-│   ├── iso8601-duration/
-│   ├── relative-time/
-│   ├── schedule-build/
-│   ├── timestamp/
-│   ├── timezone/
-│   ├── timezone-convert/
-│   ├── timezone-find/
-│   ├── unix-timestamp/
-│   ├── world-clock/
-│   └── index.ts
-├── tests/
-│   ├── business-days.test.ts
-│   ├── countdown-timer.test.ts
-│   ├── cron-humanize.test.ts
-│   ├── cron-next.test.ts
-│   ├── cron-parser.test.ts
-│   ├── date-duration.test.ts
-│   ├── date-formatter.test.ts
-│   ├── days-until.test.ts
-│   ├── discord-timestamp.test.ts
-│   ├── holidays-lookup.test.ts
-│   ├── hours-calculate.test.ts
-│   ├── ics-generate.test.ts
-│   ├── iso8601-duration.test.ts
-│   ├── relative-time.test.ts
-│   ├── schedule-build.test.ts
-│   ├── timestamp.test.ts
-│   ├── timezone-convert.test.ts
-│   ├── timezone-find.test.ts
-│   ├── timezone.test.ts
-│   ├── unix-timestamp.test.ts
-│   └── world-clock.test.ts
-├── dist/
-├── README.md
-├── LICENSE
-├── package.json
-├── package-lock.json
-└── tsconfig.json
-```
-
----
-
-## CI
-
-Automated tests and builds run via GitHub Actions on pull requests and commits to `main`.
-
----
-
-## Contributing
-
-Contributions, bug reports, and suggestions are welcome! Please open an issue or pull request on GitHub.
-
----
 
 ## License
 
