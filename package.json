@@ -1,83 +1,71 @@
 {
-"name": "@rahul_dadhich15/datetime-kit",
-"version": "1.1.0",
-"description": "A lightweight, dependency-free TypeScript toolkit for date, time, timezone, and scheduling utilities.",
-"type": "module",
-
-"main": "./dist/index.cjs",
-"module": "./dist/index.js",
-"types": "./dist/index.d.ts",
-
-"exports": {
-".": {
-"types": "./dist/index.d.ts",
-"import": "./dist/index.js",
-"require": "./dist/index.cjs"
-}
-},
-
-"files": [
-"dist"
-],
-
-"sideEffects": false,
-
-"publishConfig": {
-"access": "public"
-},
-
-"repository": {
-"type": "git",
-"url": "https://github.com/rahuldadhich1517-sys/datetime-kit.git"
-},
-
-"bugs": {
-"url": "https://github.com/rahuldadhich1517-sys/datetime-kit/issues"
-},
-
-"homepage": "https://github.com/rahuldadhich1517-sys/datetime-kit#readme",
-
-"keywords": [
-"date",
-"time",
-"datetime",
-"date-utils",
-"time-utils",
-"timezone",
-"timestamp",
-"cron",
-"cron-parser",
-"cron-humanize",
-"cron-next",
-"scheduling",
-"business-days",
-"countdown",
-"date-duration",
-"days-until",
-"discord-timestamp",
-"hours-calculate",
-"ics-generate",
-"iso8601-duration",
-"holidays-lookup",
-"world-clock",
-"typescript",
-"javascript",
-"utilities"
-],
-
-"license": "MIT",
-
-"scripts": {
-"build": "npm run clean && tsup src/index.ts --format esm,cjs && tsc",
-"clean": "node -e "require('fs').rmSync('dist',{recursive:true,force:true})"",
-"test": "vitest",
-"test:run": "vitest run",
-"typecheck": "tsc --noEmit"
-},
-
-"devDependencies": {
-"tsup": "^8.0.0",
-"typescript": "^5.0.0",
-"vitest": "^3.0.0"
-}
+  "name": "@rahul_dadhich15/datetime-kit",
+  "version": "1.1.0",
+  "description": "A lightweight, dependency-free TypeScript toolkit for date, time, timezone, and scheduling utilities.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rahuldadhich1517-sys/datetime-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rahuldadhich1517-sys/datetime-kit/issues"
+  },
+  "homepage": "https://github.com/rahuldadhich1517-sys/datetime-kit#readme",
+  "keywords": [
+    "date",
+    "time",
+    "datetime",
+    "date-utils",
+    "time-utils",
+    "timezone",
+    "timestamp",
+    "cron",
+    "cron-parser",
+    "cron-humanize",
+    "cron-next",
+    "scheduling",
+    "business-days",
+    "countdown",
+    "date-duration",
+    "days-until",
+    "discord-timestamp",
+    "hours-calculate",
+    "ics-generate",
+    "iso8601-duration",
+    "holidays-lookup",
+    "world-clock",
+    "typescript",
+    "javascript",
+    "utilities"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "npm run clean && tsup src/index.ts --format esm,cjs && tsc",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
 }
